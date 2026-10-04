@@ -25,18 +25,21 @@ const Login = () => {
     if (email !== '' && password !== '') {
       try {
         const response = await api.post('/auth/login', { email, password });
-        // The backend's /auth/login already returns a token+profile for all three
-        // roles (see authController.js: admin and citizen both come back through the
-        // same `isAvailable` User branch, officers through `isAvailableAgent`). The
-        // mobile app only ever checked `user_type_id === 2` and silently did nothing
-        // otherwise; here every role lands on its own dashboard instead.
+        // The backend's /auth/login returns a token+profile for all four roles (see
+        // authController.js: admin and citizen both come back through the same
+        // `isAvailable` User branch, officers/agents through `isAvailableAgent`,
+        // supervisors through `isAvailableSupervisor`). The mobile app only ever
+        // checked `user_type_id === 2` and silently did nothing otherwise; here every
+        // role lands on its own dashboard instead.
         login(response.data.token, response.data.data);
         const dest =
           response.data.data.user_type_id === USER_TYPES.ADMIN
             ? ROUTES.ADMIN
             : response.data.data.user_type_id === USER_TYPES.OFFICER
               ? ROUTES.OFFICER
-              : ROUTES.HOME;
+              : response.data.data.user_type_id === USER_TYPES.SUPERVISOR
+                ? ROUTES.SUPERVISOR
+                : ROUTES.HOME;
         navigate(dest, { replace: true });
       } catch (error) {
         console.log(error);

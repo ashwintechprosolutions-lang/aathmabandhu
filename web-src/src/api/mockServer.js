@@ -30,10 +30,9 @@ function pickOfficerByLevel(agentsInSector, caseLevel, complaintPincode) {
   })[0];
 }
 
-// Bumped to v4: seed data is now scoped to GHMC limits only (see
-// api/dummyData.js's LOCATIONS) - forces a fresh reseed for any browser that
-// already had the old pan-Telangana demo data cached.
-const DB_KEY = 'atmabandhu_mock_db_v4';
+// Bumped to v5: added the Supervisor role (db.supervisors) - forces a fresh
+// reseed for any browser whose cached DB predates that collection.
+const DB_KEY = 'atmabandhu_mock_db_v5';
 const LATENCY_MS = 350;
 const OTP_TTL_MS = 10 * 60 * 1000;
 
@@ -142,12 +141,31 @@ function login(db, body) {
       message: 'Agent Successfully Loggedin.',
     });
   }
+  const supervisor = db.supervisors.find((s) => s.email === email);
+  if (supervisor) {
+    if (supervisor.password !== body.password) return fail(400, { message: 'Password is incorrect.' });
+    const token = fakeJwt({ supervisor_id: supervisor.supervisor_id, user_type_id: supervisor.user_type_id });
+    db.sessions.push({ session_id: nextId(db.sessions, 'session_id'), userId: String(supervisor.supervisor_id), jwt: token, status: 'Valid', createdAt: now(), updatedAt: now() });
+    save(db);
+    return ok({
+      token,
+      data: {
+        full_name: supervisor.full_name,
+        mobile: supervisor.mobile,
+        user_type_id: supervisor.user_type_id,
+        supervisor_id: supervisor.supervisor_id,
+        monitors_sector: supervisor.monitors_sector,
+        notification_id: supervisor.notification_id,
+      },
+      message: 'Supervisor Successfully Loggedin.',
+    });
+  }
   return fail(400, { message: 'User not exist.' });
 }
 
 function forgotPassword(db, body) {
   const email = lc(body.email);
-  const account = db.users.find((u) => u.email === email) || db.agents.find((a) => a.email === email);
+  const account = db.users.find((u) => u.email === email) || db.agents.find((a) => a.email === email) || db.supervisors.find((s) => s.email === email);
   if (!account) return fail(400, { message: 'User not exist.' });
 
   const otp = genOtp();
@@ -161,7 +179,7 @@ function forgotPassword(db, body) {
 
 function verifyEmailOTP(db, body) {
   const { email, otp, password, Cpassword } = body;
-  const account = db.users.find((u) => u.email === lc(email)) || db.agents.find((a) => a.email === lc(email));
+  const account = db.users.find((u) => u.email === lc(email)) || db.agents.find((a) => a.email === lc(email)) || db.supervisors.find((s) => s.email === lc(email));
   if (!account) return fail(400, { message: 'User not exist.' });
   if (account.otp !== String(otp) || new Date(account.otpExpiration) < new Date()) {
     return fail(400, { message: 'Invalid OTP or OTP has expired.' });
@@ -311,6 +329,53 @@ function updateAgentProfile(db, body) {
   return ok({ agent: [rows.length] });
 }
 
+// ---------- /supervisor ----------
+function createSupervisor(db, body) {
+  const { email, password, Cpassword, full_name, mobile, user_type_id, monitors_sector, aadhar_number } = body;
+  if (password !== Cpassword) return fail(400, { message: 'Password not match.' });
+  if (db.supervisors.find((s) => s.email === lc(email))) return fail(400, { message: 'User already exists.' });
+  if (db.supervisors.find((s) => s.aadhar_number === String(aadhar_number))) {
+    return fail(400, { message: 'A supervisor with this aadhar number already exists.' });
+  }
+  const supervisor = {
+    supervisor_id: nextId(db.supervisors, 'supervisor_id'),
+    user_type_id: Number(user_type_id),
+    email: lc(email),
+    full_name,
+    mobile: Number(mobile),
+    password,
+    monitors_sector: monitors_sector || null,
+    otp: null,
+    otpExpiration: null,
+    aadhar_number: String(aadhar_number),
+    createdAt: now(),
+    updatedAt: now(),
+  };
+  supervisor.notification_id = `Supervisor${supervisor.supervisor_id}`;
+  db.supervisors.push(supervisor);
+  save(db);
+  return ok({ message: 'Supervisor created successfully.' });
+}
+
+const getAllSupervisors = (db) => ok({ supervisors: db.supervisors.map(publicUser) });
+const getSupervisor = (db, _b, [id]) => {
+  const s = db.supervisors.find((x) => String(x.supervisor_id) === id);
+  return ok({ supervisor: s ? publicUser(s) : null });
+};
+
+function deleteSupervisor(db, _b, [id]) {
+  db.supervisors = db.supervisors.filter((s) => String(s.supervisor_id) !== id);
+  save(db);
+  return ok({ message: 'Supervisor Deleted Successfully' });
+}
+
+function updateSupervisorProfile(db, body) {
+  const rows = db.supervisors.filter((s) => s.aadhar_number === String(body.aadhar_number));
+  rows.forEach((s) => Object.assign(s, { full_name: body.full_name, mobile: Number(body.mobile), updatedAt: now() }));
+  save(db);
+  return ok({ supervisor: [rows.length] });
+}
+
 // ---------- /notification ----------
 function sendNotifications(db, body) {
   const { notification_id, message, date, time } = body;
@@ -350,6 +415,12 @@ const routes = [
   ['post', /^\/agent\/changeStatus$/, changeStatus],
   ['delete', /^\/agent\/deleteAgent\/([^/]+)$/, deleteAgent],
   ['put', /^\/agent\/updateAgentProfile$/, updateAgentProfile],
+
+  ['post', /^\/supervisor\/createSupervisor$/, createSupervisor],
+  ['get', /^\/supervisor\/getAllSupervisors$/, getAllSupervisors],
+  ['get', /^\/supervisor\/getSupervisorDetails\/([^/]+)$/, getSupervisor],
+  ['delete', /^\/supervisor\/deleteSupervisor\/([^/]+)$/, deleteSupervisor],
+  ['put', /^\/supervisor\/updateSupervisorProfile$/, updateSupervisorProfile],
 
   ['post', /^\/notification\/sendNotifications$/, sendNotifications],
   ['get', /^\/notification\/getNotifications\/([^/]+)$/, getNotifications],

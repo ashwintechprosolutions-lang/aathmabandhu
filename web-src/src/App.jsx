@@ -20,17 +20,29 @@ import {
   AdminComplaints,
   AdminOfficers,
   AdminCitizens,
+  AdminSupervisors,
   AdminNotifications,
+  SupervisorDashboard,
+  SupervisorComplaints,
+  SupervisorAgents,
+  SupervisorNotifications,
+  SupervisorProfile,
 } from './screens';
 import CitizenLayout from './navigation/CitizenLayout';
 import OfficerLayout from './navigation/OfficerLayout';
 import AdminLayout from './navigation/AdminLayout';
+import SupervisorLayout from './navigation/SupervisorLayout';
 import { ROUTES, USER_TYPES } from './constants';
 import { useStore } from './store';
 
 const SPLASH_MS = 3000;
 
-const HOME_FOR = { [USER_TYPES.ADMIN]: ROUTES.ADMIN, [USER_TYPES.CITIZEN]: ROUTES.HOME, [USER_TYPES.OFFICER]: ROUTES.OFFICER };
+const HOME_FOR = {
+  [USER_TYPES.ADMIN]: ROUTES.ADMIN,
+  [USER_TYPES.CITIZEN]: ROUTES.HOME,
+  [USER_TYPES.OFFICER]: ROUTES.OFFICER,
+  [USER_TYPES.SUPERVISOR]: ROUTES.SUPERVISOR,
+};
 
 // Guards a role's route tree: not logged in -> Get Started; logged in as the wrong
 // role -> that role's own home, so a citizen can never land on /admin and back.
@@ -109,7 +121,22 @@ export default function App() {
         <Route path={ROUTES.ADMIN_COMPLAINTS} element={<AdminComplaints />} />
         <Route path={ROUTES.ADMIN_OFFICERS} element={<AdminOfficers />} />
         <Route path={ROUTES.ADMIN_CITIZENS} element={<AdminCitizens />} />
+        <Route path={ROUTES.ADMIN_SUPERVISORS} element={<AdminSupervisors />} />
         <Route path={ROUTES.ADMIN_NOTIFICATIONS} element={<AdminNotifications />} />
+      </Route>
+
+      <Route
+        element={
+          <RequireRole type={USER_TYPES.SUPERVISOR}>
+            <SupervisorLayout />
+          </RequireRole>
+        }
+      >
+        <Route path={ROUTES.SUPERVISOR} element={<SupervisorDashboard />} />
+        <Route path={ROUTES.SUPERVISOR_COMPLAINTS} element={<SupervisorComplaints />} />
+        <Route path={ROUTES.SUPERVISOR_AGENTS} element={<SupervisorAgents />} />
+        <Route path={ROUTES.SUPERVISOR_NOTIFICATIONS} element={<SupervisorNotifications />} />
+        <Route path={ROUTES.SUPERVISOR_PROFILE} element={<SupervisorProfile />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

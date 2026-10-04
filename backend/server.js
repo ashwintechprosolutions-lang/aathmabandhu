@@ -8,6 +8,7 @@ const complaintRoutes = require('./routes/complaintRouter')
 const authRoutes = require('./routes/authRouter')
 const notificationRoutes = require('./routes/notificationRouter')
 const agentRoutes = require('./routes/agentRouter')
+const supervisorRoutes = require('./routes/supervisorRouter')
 const db = require('./models')
 const jwtMiddleWare = require('./middleWare/jwtMiddleWare')
 const path = require('path')
@@ -24,6 +25,7 @@ app.use('/notification', notificationRoutes)
 app.use('/complaint',complaintRoutes)
 app.use('/user',userRoutes)
 app.use('/agent',agentRoutes)
+app.use('/supervisor',supervisorRoutes)
 
 // static images folder
 // app.use('/uploads', express.static(path.join(__dirname, '/uploads')));

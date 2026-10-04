@@ -22,7 +22,7 @@ const write = (key, value) => {
   }
 };
 
-const SESSION_KEYS = ['authToken', 'UserId', 'UserFullName', 'UserMobile', 'NotificationId', 'UserType', 'AgentId', 'AgentSector'];
+const SESSION_KEYS = ['authToken', 'UserId', 'UserFullName', 'UserMobile', 'NotificationId', 'UserType', 'AgentId', 'AgentSector', 'SupervisorId', 'MonitorsSector'];
 
 export function StoreProvider({ children }) {
   const [userToken, setUserToken] = useState(() => read('authToken'));
@@ -33,12 +33,15 @@ export function StoreProvider({ children }) {
   const [userType, setUserType] = useState(() => read('UserType'));
   const [agentId, setAgentId] = useState(() => read('AgentId'));
   const [agentSector, setAgentSector] = useState(() => read('AgentSector'));
+  const [supervisorId, setSupervisorId] = useState(() => read('SupervisorId'));
+  const [monitorsSector, setMonitorsSector] = useState(() => read('MonitorsSector'));
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!read('authToken'));
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
 
-  // `data` is the login response's `data` object (users and agents return different fields).
+  // `data` is the login response's `data` object (users, agents and supervisors
+  // all return different fields).
   const login = useCallback((token, data) => {
-    const nid = data.notification_id || (data.agent_id ? `Agent${data.agent_id}` : '');
+    const nid = data.notification_id || (data.agent_id ? `Agent${data.agent_id}` : data.supervisor_id ? `Supervisor${data.supervisor_id}` : '');
     const session = {
       authToken: token,
       UserId: data.user_id ?? '',
@@ -48,6 +51,8 @@ export function StoreProvider({ children }) {
       UserType: data.user_type_id,
       AgentId: data.agent_id ?? '',
       AgentSector: data.agent_sector ?? '',
+      SupervisorId: data.supervisor_id ?? '',
+      MonitorsSector: data.monitors_sector ?? '',
     };
     Object.entries(session).forEach(([k, v]) => write(k, v));
     setUserToken(token);
@@ -58,6 +63,8 @@ export function StoreProvider({ children }) {
     setUserType(data.user_type_id);
     setAgentId(session.AgentId);
     setAgentSector(session.AgentSector);
+    setSupervisorId(session.SupervisorId);
+    setMonitorsSector(session.MonitorsSector);
     setIsLoggedIn(true);
   }, []);
 
@@ -85,6 +92,8 @@ export function StoreProvider({ children }) {
     userType,
     agentId,
     agentSector,
+    supervisorId,
+    monitorsSector,
     forgotPasswordEmail,
     setForgotPasswordEmail,
     login,

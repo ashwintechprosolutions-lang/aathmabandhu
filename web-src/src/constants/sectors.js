@@ -19,4 +19,8 @@ export const STATUS = {
   COMPLETED: 'completed',
 };
 
-export const USER_TYPES = { ADMIN: 1, CITIZEN: 2, OFFICER: 3 };
+// OFFICER (3) is the backend's "Agent" role - the one who resolves complaints
+// (the UI happens to label it "Officer"). SUPERVISOR (4) is a separate,
+// read-only monitor role - oversees a department's agents/complaints (or all
+// departments) but never resolves anything itself.
+export const USER_TYPES = { ADMIN: 1, CITIZEN: 2, OFFICER: 3, SUPERVISOR: 4 };

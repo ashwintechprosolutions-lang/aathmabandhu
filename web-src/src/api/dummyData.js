@@ -232,13 +232,41 @@ export const agents = OFFICERS.map(([full_name, local, agent_sector, officer_lev
   officer_level,
   // Base/office area, used for the admin map and nearest-officer routing
   // (see services/agentAssignment.js-equivalent in mockServer.js). Spread
-  // across the same Telangana locations complaints are raised from.
+  // across the same GHMC locations complaints are raised from.
   office_pincode: LOCATIONS[i % LOCATIONS.length][1],
   otp: null,
   otpExpiration: null,
   aadhar_number: String(100900000000 + (i + 1) * 104729).padStart(12, '0'),
   createdAt: daysAgo(150),
   updatedAt: daysAgo(150),
+}));
+
+// ---------------------------------------------------------------------------
+// Supervisors - read-only monitor role (user_type_id 4). Each oversees one
+// department's agents/complaints, except the last ("All Departments" - null
+// monitors_sector), mirroring a district-level vs department-level government
+// supervisor.
+// ---------------------------------------------------------------------------
+const SUPERVISORS = [
+  ['Ramesh Varma', 'ramesh.super', 'Water Supply'],
+  ['Lakshmi Prasanna', 'lakshmi.super', 'Roads'],
+  ['Chief Supervisor', 'chief.super', null],
+];
+
+export const supervisors = SUPERVISORS.map(([full_name, local, monitors_sector], i) => ({
+  supervisor_id: i + 1,
+  notification_id: `Supervisor${i + 1}`,
+  user_type_id: 4,
+  email: `${local}@atmabandhu.in`,
+  full_name,
+  mobile: 9900000000 + (i + 1) * 3187,
+  password: 'Supervisor@123',
+  monitors_sector,
+  otp: null,
+  otpExpiration: null,
+  aadhar_number: String(100800000000 + (i + 1) * 104729).padStart(12, '0'),
+  createdAt: daysAgo(100),
+  updatedAt: daysAgo(100),
 }));
 
 // ---------------------------------------------------------------------------
@@ -391,6 +419,7 @@ export const aadharData = [
 export const seed = () => ({
   users: JSON.parse(JSON.stringify(users)),
   agents: JSON.parse(JSON.stringify(agents)),
+  supervisors: JSON.parse(JSON.stringify(supervisors)),
   complaints: JSON.parse(JSON.stringify(complaints)),
   notifications: JSON.parse(JSON.stringify(notifications)),
   sessions: [],

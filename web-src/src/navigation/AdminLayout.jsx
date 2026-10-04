@@ -1,5 +1,5 @@
 import React from 'react';
-import { IoGrid, IoDocumentText, IoMap, IoNotifications, IoPeople, IoPeopleCircle } from 'react-icons/io5';
+import { IoEye, IoGrid, IoDocumentText, IoMap, IoNotifications, IoPeople, IoPeopleCircle } from 'react-icons/io5';
 import RoleShell from './RoleShell';
 import { ROUTES } from '../constants';
 
@@ -16,6 +16,7 @@ const drawerItems = [
   { label: 'Complaints', Icon: IoDocumentText, path: ROUTES.ADMIN_COMPLAINTS },
   { label: 'Officers', Icon: IoPeople, path: ROUTES.ADMIN_OFFICERS },
   { label: 'Citizens', Icon: IoPeopleCircle, path: ROUTES.ADMIN_CITIZENS },
+  { label: 'Supervisors', Icon: IoEye, path: ROUTES.ADMIN_SUPERVISORS },
   { label: 'Notifications', Icon: IoNotifications, path: ROUTES.ADMIN_NOTIFICATIONS },
 ];
 

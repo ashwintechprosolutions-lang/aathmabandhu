@@ -38,6 +38,7 @@ db.sessions = require('./sessionModel.js')(sequelize, DataTypes)
 db.notifications = require('./notificationModel.js')(sequelize, DataTypes)
 db.complaints = require('./complaintsModel.js')(sequelize, DataTypes)
 db.agents = require('./agentsModel.js')(sequelize, DataTypes)
+db.supervisors = require('./supervisorsModel.js')(sequelize, DataTypes)
 
 
 db.sequelize.sync({ force: false })

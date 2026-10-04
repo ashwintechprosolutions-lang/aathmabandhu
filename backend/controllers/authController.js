@@ -3,6 +3,7 @@ const db = require('../models')
 // create main Model
 const User = db.users
 const Agent = db.agents
+const Supervisor = db.supervisors
 
 // Hash Password
 var bcrypt = require('bcryptjs');
@@ -125,6 +126,13 @@ const login = async (req,res) => {
     email: email.toLowerCase()
     }
     });
+      // Supervisor Login Check (monitor-only role - oversees a department's
+      // agents/complaints, never resolves them)
+  const isAvailableSupervisor = await Supervisor.findOne({
+    where: {
+    email: email.toLowerCase()
+    }
+    });
 
 
   //   // Provider Login
@@ -195,6 +203,31 @@ else if(isAvailableAgent){
     message: 'Agent Successfully Loggedin.' })
 }
 
+else if(isAvailableSupervisor){
+  console.log("Supervisor")
+  let passMatchSupervisor = await bcrypt.compare(password, isAvailableSupervisor.password);
+
+  if (!passMatchSupervisor) return res.status(400).send({ message: "Password is incorrect." });
+
+  const tokenSupervisor = jwt.sign({ supervisor_id: isAvailableSupervisor.supervisor_id, user_type_id: isAvailableSupervisor.user_type_id }, jwtSEC, { expiresIn: '365d'})
+
+  await Session.create({
+      userId:isAvailableSupervisor.supervisor_id,
+      jwt:tokenSupervisor,
+      status:"Valid"
+  })
+   const dataSupervisor = {
+      full_name: isAvailableSupervisor.full_name,
+      mobile: isAvailableSupervisor.mobile,
+      user_type_id: isAvailableSupervisor.user_type_id,
+      supervisor_id: isAvailableSupervisor.supervisor_id,
+      monitors_sector: isAvailableSupervisor.monitors_sector,
+      notification_id: isAvailableSupervisor.notification_id
+   }
+   return res.status(200).send({token:tokenSupervisor,data:dataSupervisor,
+    message: 'Supervisor Successfully Loggedin.' })
+}
+
 // else if(isAvailableProvider){
 //   console.log("Provider")
 //   let passMatchProvider = await bcrypt.compare(password, isAvailableProvider.password);
@@ -239,7 +272,10 @@ const ForgotPassword = async (req, res) => {
     let agent = await Agent.findOne({
       where: { email: userEmail.toLowerCase() }
       });
- 
+    let supervisor = await Supervisor.findOne({
+      where: { email: userEmail.toLowerCase() }
+      });
+
     console.log(user)
 if(user){
       user.otp = otp;
@@ -267,6 +303,17 @@ return res.json({ message: 'Password reset OTP sent to your email.' });
 
 }
 
+if(supervisor){
+  supervisor.otp = otp;
+  supervisor.otpExpiration = new Date(Date.now() + OTP_TTL_MS);
+  supervisor.save();
+
+sendForgotPasswordEmail(userEmail.toLowerCase(), otp);
+
+return res.json({ message: 'Password reset OTP sent to your email.' });
+
+}
+
 // Bug fix: previously fell through here with no response at all, leaving the
 // caller's request hanging until it timed out.
 return res.status(400).json({ message: 'User not exist.' });
@@ -285,7 +332,10 @@ console.log(email, otp, password,Cpassword)
     let agent = await Agent.findOne({
       where: { email: email.toLowerCase() }
       });
-  
+    let supervisor = await Supervisor.findOne({
+      where: { email: email.toLowerCase() }
+      });
+
     // Check if the OTP matches and if it's not expired
     // console.log(user,"userrrrrrrrrrrrrrrrrrr")
     if(user){
@@ -321,6 +371,22 @@ console.log(email, otp, password,Cpassword)
         agent.otpExpiration = null;
         agent.save();
   
+        return res.json({ message: 'OTP is valid.' });
+      } else {
+        return res.status(400).json({ message: 'Invalid OTP or OTP has expired.' });
+      }}
+
+    if(supervisor){
+      if (supervisor.otp === otp && supervisor.otpExpiration >= new Date()) {
+        if (password !== Cpassword) return res.status (400).send({ message: "Password not match."})
+
+        var passwordHash = bcrypt.hashSync(password, salt);
+
+        supervisor.password = passwordHash;
+        supervisor.otp = null;
+        supervisor.otpExpiration = null;
+        supervisor.save();
+
         return res.json({ message: 'OTP is valid.' });
       } else {
         return res.status(400).json({ message: 'Invalid OTP or OTP has expired.' });
