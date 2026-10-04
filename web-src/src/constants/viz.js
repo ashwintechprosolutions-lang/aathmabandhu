@@ -3,9 +3,10 @@
 // if these ever change, re-run scripts/validate_palette.js.
 export const VIZ = {
   sequentialBlue: { light: '#2a78d6', dark: '#3987e5' },
-  // Second simultaneous magnitude context on the same dashboard takes the next
-  // categorical slot's hue (orange), per the dataviz skill's palette.md.
+  // Second/third simultaneous magnitude context on the same dashboard takes the
+  // next categorical slot's hue, per the dataviz skill's palette.md.
   sequentialOrange: { light: '#eb6834', dark: '#d95926' },
+  sequentialAqua: { light: '#1baf7a', dark: '#199e70' },
   status: {
     good: '#0ca30c', // resolved / completed
     warning: '#fab219', // pending

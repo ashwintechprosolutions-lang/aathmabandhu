@@ -7,12 +7,16 @@ import React, { useMemo } from 'react';
 import { IoBusiness, IoDocumentText, IoPeople, IoPeopleCircle } from 'react-icons/io5';
 import StatTile from '../../components/StatTile';
 import BarChart from '../../components/charts/BarChart';
-import StackedStatusBar from '../../components/charts/StackedStatusBar';
+import DonutChart from '../../components/charts/DonutChart';
+import TrendChart from '../../components/charts/TrendChart';
 import Spinner from '../../components/Spinner';
 import { COLORS, SECTORS } from '../../constants';
-import { VIZ } from '../../constants/viz';
+import { VIZ, STATUS_META, LEVEL_META } from '../../constants/viz';
 import useApi from '../../hooks/useApi';
 import api from '../../api/client';
+
+const TREND_DAYS = 14;
+const short = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 
 const AdminDashboard = () => {
   const { data: complaints, loading: loadingComplaints } = useApi(async () => (await api.get('/complaint/getAllComplaints')).data.complaints || [], []);
@@ -29,12 +33,40 @@ const AdminDashboard = () => {
       .sort((a, b) => b.value - a.value);
   }, [complaints]);
 
-  const statusCounts = useMemo(() => {
+  const statusSegments = useMemo(() => {
     const c = { pending: 0, 'in-progress': 0, completed: 0 };
     (complaints || []).forEach((x) => {
       c[x.status] = (c[x.status] || 0) + 1;
     });
-    return c;
+    return ['pending', 'in-progress', 'completed'].map((k) => ({ label: STATUS_META[k].label, value: c[k], color: STATUS_META[k].color }));
+  }, [complaints]);
+
+  const levelSegments = useMemo(() => {
+    const c = { Low: 0, Medium: 0, High: 0, Unclassified: 0 };
+    (complaints || []).forEach((x) => {
+      c[x.case_level && LEVEL_META[x.case_level] ? x.case_level : 'Unclassified']++;
+    });
+    const segs = ['Low', 'Medium', 'High'].map((k) => ({ label: LEVEL_META[k].label, value: c[k], color: LEVEL_META[k].color }));
+    // Only show the Unclassified slice if any complaint actually predates the
+    // Claude triage feature - don't clutter the legend with an always-zero entry.
+    if (c.Unclassified > 0) segs.push({ label: 'Unclassified', value: c.Unclassified, color: VIZ.ink.muted });
+    return segs;
+  }, [complaints]);
+
+  const trend = useMemo(() => {
+    const days = [];
+    for (let i = TREND_DAYS - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      days.push({ key: d.toDateString(), label: short(d), value: 0 });
+    }
+    const byKey = Object.fromEntries(days.map((d) => [d.key, d]));
+    (complaints || []).forEach((c) => {
+      const key = new Date(c.createdAt).toDateString();
+      if (byKey[key]) byKey[key].value += 1;
+    });
+    return days;
   }, [complaints]);
 
   const officerLoad = useMemo(
@@ -66,10 +98,26 @@ const AdminDashboard = () => {
             <StatTile label="Registered Citizens" value={citizens.length} Icon={IoPeopleCircle} color={COLORS.navy} />
           </div>
 
+          <div className="dash-section-row">
+            <div className="dash-section half">
+              <div className="dash-section-title">Status Mix</div>
+              <div className="panel" style={{ padding: 18 }}>
+                <DonutChart segments={statusSegments} centerLabel="complaints" />
+              </div>
+            </div>
+
+            <div className="dash-section half">
+              <div className="dash-section-title">Urgency Mix</div>
+              <div className="panel" style={{ padding: 18 }}>
+                <DonutChart segments={levelSegments} centerLabel="complaints" />
+              </div>
+            </div>
+          </div>
+
           <div className="dash-section">
-            <div className="dash-section-title">Status Mix</div>
+            <div className="dash-section-title">Complaints Raised - last {TREND_DAYS} days</div>
             <div className="panel" style={{ padding: 18 }}>
-              <StackedStatusBar counts={statusCounts} />
+              <TrendChart points={trend} />
             </div>
           </div>
 

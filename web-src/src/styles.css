@@ -425,6 +425,14 @@ img {
 .dash-section {
   padding: 16px 20px 4px;
 }
+.dash-section-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+.dash-section-row .dash-section.half {
+  flex: 1 1 260px;
+  min-width: 0;
+}
 .dash-section-title {
   font-size: 15px;
   font-weight: 700;
@@ -712,6 +720,41 @@ img {
   display: flex;
   overflow: hidden;
   gap: 2px;
+}
+
+/* ---------- Donut chart ---------- */
+.donut-ring {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.donut-hole {
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.donut-center-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0b0b0b;
+  line-height: 1.1;
+}
+.donut-center-label {
+  font-size: 10px;
+  color: #898781;
+  margin-top: 2px;
+  text-align: center;
+}
+
+/* ---------- Trend (line) chart ---------- */
+.trend-chart {
+  width: 100%;
+  height: 120px;
+  display: block;
 }
 .stacked-status-track span {
   display: block;
