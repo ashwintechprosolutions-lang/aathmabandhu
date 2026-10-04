@@ -29,7 +29,18 @@ function mix(hexA, hexB, t) {
   return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(',')})`;
 }
 
-const ComplaintMap = ({ areaPoints = [], hotspots = [], officers = [], statusPoints = [], center = DEFAULT_CENTER, zoom = DEFAULT_ZOOM, height = 360 }) => {
+const ComplaintMap = ({
+  areaPoints = [],
+  hotspots = [],
+  officers = [],
+  statusPoints = [],
+  center = DEFAULT_CENTER,
+  zoom = DEFAULT_ZOOM,
+  height = 360,
+  onAreaClick,
+  onHotspotClick,
+  selectedKey,
+}) => {
   const maxCount = useMemo(() => Math.max(1, ...areaPoints.map((p) => p.count)), [areaPoints]);
   const statusLegend = useMemo(() => {
     const seen = new Map();
@@ -48,12 +59,19 @@ const ComplaintMap = ({ areaPoints = [], hotspots = [], officers = [], statusPoi
         {areaPoints.map((p) => {
           const t = Math.min(1, p.count / maxCount);
           const color = mix(VIZ.sequentialOrange.light, '#7a2d0c', t * 0.7);
+          const isSelected = selectedKey === `area-${p.pincode}`;
           return (
             <CircleMarker
               key={`area-${p.pincode}`}
               center={[p.lat, p.lng]}
               radius={10 + Math.sqrt(p.count) * 6}
-              pathOptions={{ color, fillColor: color, fillOpacity: 0.55, weight: 2 }}
+              pathOptions={{
+                color: isSelected ? VIZ.ink.primary : color,
+                fillColor: color,
+                fillOpacity: isSelected ? 0.8 : 0.55,
+                weight: isSelected ? 3 : 2,
+              }}
+              eventHandlers={onAreaClick ? { click: () => onAreaClick(p) } : undefined}
             >
               <Tooltip>
                 <strong>{p.area}</strong>
@@ -65,27 +83,43 @@ const ComplaintMap = ({ areaPoints = [], hotspots = [], officers = [], statusPoi
                     {p.levels.High} High urgency
                   </>
                 ) : null}
+                {!!onAreaClick && (
+                  <>
+                    <br />
+                    <em>Tap to list</em>
+                  </>
+                )}
               </Tooltip>
             </CircleMarker>
           );
         })}
 
-        {hotspots.map((h) => (
-          <CircleMarker
-            key={`hotspot-${h.sector}-${h.pincode}`}
-            center={[h.lat, h.lng]}
-            radius={26}
-            pathOptions={{ color: HOTSPOT_COLOR, fillColor: HOTSPOT_COLOR, fillOpacity: 0.08, weight: 2, dashArray: '6 6' }}
-          >
-            <Tooltip>
-              <strong>Hotspot: {h.sector}</strong>
-              <br />
-              {h.area}
-              <br />
-              {h.count} repeated complaints
-            </Tooltip>
-          </CircleMarker>
-        ))}
+        {hotspots.map((h) => {
+          const isSelected = selectedKey === `hotspot-${h.sector}-${h.pincode}`;
+          return (
+            <CircleMarker
+              key={`hotspot-${h.sector}-${h.pincode}`}
+              center={[h.lat, h.lng]}
+              radius={26}
+              pathOptions={{ color: HOTSPOT_COLOR, fillColor: HOTSPOT_COLOR, fillOpacity: isSelected ? 0.22 : 0.08, weight: isSelected ? 3 : 2, dashArray: '6 6' }}
+              eventHandlers={onHotspotClick ? { click: () => onHotspotClick(h) } : undefined}
+            >
+              <Tooltip>
+                <strong>Hotspot: {h.sector}</strong>
+                <br />
+                {h.area}
+                <br />
+                {h.count} repeated complaints
+                {!!onHotspotClick && (
+                  <>
+                    <br />
+                    <em>Tap to list</em>
+                  </>
+                )}
+              </Tooltip>
+            </CircleMarker>
+          );
+        })}
 
         {officers.map((o, i) => (
           <CircleMarker key={`officer-${i}`} center={[o.lat, o.lng]} radius={5} pathOptions={{ color: OFFICER_COLOR, fillColor: OFFICER_COLOR, fillOpacity: 0.9, weight: 1 }}>

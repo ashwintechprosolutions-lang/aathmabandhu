@@ -19,7 +19,7 @@ export function aggregateByPincode(complaints) {
       const key = c.case_level && levels[c.case_level] !== undefined ? c.case_level : 'Unclassified';
       levels[key]++;
     });
-    return { pincode, area, lat, lng, count: rows.length, levels };
+    return { pincode, area, lat, lng, count: rows.length, levels, complaints: rows };
   });
 }
 
@@ -45,6 +45,7 @@ export function findHotspots(complaints, minCount = 3) {
         lng,
         count: g.rows.length,
         highCount: g.rows.filter((c) => c.case_level === 'High').length,
+        complaints: g.rows,
       };
     })
     .sort((a, b) => b.count - a.count);

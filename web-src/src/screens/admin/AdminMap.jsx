@@ -2,9 +2,10 @@
 // (GET /complaint/getAllComplaints, GET /agent/getAllAgents) - no new backend
 // aggregation route exists, so density/hotspot clustering is derived
 // client-side (src/utils/geo.js), same pattern as the dashboard's chart data.
-import React, { useMemo } from 'react';
-import { IoWarning } from 'react-icons/io5';
+import React, { useMemo, useState } from 'react';
+import { IoClose, IoWarning } from 'react-icons/io5';
 import ComplaintMap from '../../components/charts/ComplaintMap';
+import ComplaintListItem from '../../components/ComplaintListItem';
 import Spinner from '../../components/Spinner';
 import EmptyState from '../../components/EmptyState';
 import { aggregateByPincode, findHotspots } from '../../utils/geo';
@@ -18,6 +19,7 @@ const AdminMap = () => {
   const { data: complaints, loading: loadingComplaints } = useApi(async () => (await api.get('/complaint/getAllComplaints')).data.complaints || [], []);
   const { data: agents, loading: loadingAgents } = useApi(async () => (await api.get('/agent/getAllAgents')).data.agents || [], []);
   const loading = loadingComplaints || loadingAgents;
+  const [selected, setSelected] = useState(null); // { key, title, subtitle, complaints }
 
   const areaPoints = useMemo(() => aggregateByPincode(complaints || []), [complaints]);
   const hotspots = useMemo(() => findHotspots(complaints || [], HOTSPOT_MIN), [complaints]);
@@ -49,16 +51,54 @@ const AdminMap = () => {
         <>
           <div className="dash-section">
             <div className="panel" style={{ padding: 12 }}>
-              <ComplaintMap areaPoints={areaPoints} hotspots={hotspots} officers={officerPoints} height={360} />
+              <ComplaintMap
+                areaPoints={areaPoints}
+                hotspots={hotspots}
+                officers={officerPoints}
+                height={360}
+                selectedKey={selected?.key}
+                onAreaClick={(p) =>
+                  setSelected({ key: `area-${p.pincode}`, title: p.area, subtitle: `${p.count} complaint${p.count === 1 ? '' : 's'}`, complaints: p.complaints })
+                }
+                onHotspotClick={(h) =>
+                  setSelected({ key: `hotspot-${h.sector}-${h.pincode}`, title: `${h.sector} - ${h.area}`, subtitle: `${h.count} repeated complaints`, complaints: h.complaints })
+                }
+              />
             </div>
           </div>
+
+          {!!selected && (
+            <div className="dash-section" style={{ paddingBottom: 24 }}>
+              <div className="dash-section-title">
+                <span>
+                  {selected.title} ({selected.complaints.length})
+                </span>
+                <button type="button" className="touchable link-btn" onClick={() => setSelected(null)} aria-label="Clear selection">
+                  <IoClose size={14} style={{ verticalAlign: -2 }} /> Clear
+                </button>
+              </div>
+              <div className="page-subtitle" style={{ margin: '-6px 0 10px' }}>{selected.subtitle}</div>
+              <div className="tile-grid">
+                {selected.complaints.map((c) => (
+                  <ComplaintListItem key={c.complaint_id} complaint={c} />
+                ))}
+              </div>
+            </div>
+          )}
 
           {!!hotspots.length && (
             <div className="dash-section" style={{ paddingBottom: 24 }}>
               <div className="dash-section-title">Recurring Hotspots ({hotspots.length})</div>
               <div className="tile-grid">
                 {hotspots.map((h) => (
-                  <div key={`${h.sector}-${h.pincode}`} className="tile-card">
+                  <button
+                    type="button"
+                    key={`${h.sector}-${h.pincode}`}
+                    className="touchable tile-card"
+                    onClick={() =>
+                      setSelected({ key: `hotspot-${h.sector}-${h.pincode}`, title: `${h.sector} - ${h.area}`, subtitle: `${h.count} repeated complaints`, complaints: h.complaints })
+                    }
+                  >
                     <div>
                       <div className="complaint-id">{h.sector}</div>
                       <div className="complaint-sector">{h.area}</div>
@@ -71,7 +111,7 @@ const AdminMap = () => {
                         <IoWarning size={11} style={{ verticalAlign: -1 }} /> Hotspot
                       </span>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
