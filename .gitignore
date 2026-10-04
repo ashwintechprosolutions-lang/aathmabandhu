@@ -1,0 +1,30 @@
+# Build artifacts / regenerated from web-src - not versioned, deployed by
+# building web-src and copying dist/ here (see the agent .md §7).
+web/
+
+# Dependencies - reinstalled via npm install on deploy
+backend/node_modules/
+web-src/node_modules/
+
+# Secrets - never commit these. backend/.env holds the live DB password and
+# JWT_SECRET; web-src/.env is non-secret config but kept out for consistency.
+backend/.env
+web-src/.env
+
+# User-uploaded complaint attachments - runtime data, not source
+backend/uploads/
+
+# Build output of web-src itself (distinct from the deployed web/ above)
+web-src/dist/
+
+# OS/editor noise
+.DS_Store
+*.log
+
+# /opt/atmabandhu doubles as the `atmabandhu` system user's home directory, so
+# useradd's skeleton files land here too - not part of the app.
+.bash_logout
+.bashrc
+.cloud-locale-test.skip
+.profile
+.npm/

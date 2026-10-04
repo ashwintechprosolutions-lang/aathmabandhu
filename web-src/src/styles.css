@@ -1,0 +1,754 @@
+/* Base: emulate React Native layout defaults (flex column, border-box, Roboto). */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+:root {
+  --saffron: #ff9933;
+  --india-green: #138808;
+  --navy: #0b2e86;
+  --navy-deep: #071c57;
+}
+
+body {
+  /* Live, slowly-drifting Indian tricolour wash - the app's signature background.
+     A big soft diagonal gradient with the white band doing most of the work, so
+     it reads as a subtle "living" surface rather than a loud stripe. */
+  background: linear-gradient(120deg, #ff9933 0%, #ffcf8f 16%, #fbfbf8 38%, #ffffff 50%, #fbfbf8 62%, #8fd18f 84%, #138808 100%);
+  background-size: 320% 320%;
+  animation: indiaFlow 22s ease-in-out infinite;
+  color: #000;
+  font-family: Roboto, system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes indiaFlow {
+  0% { background-position: 0% 45%; }
+  50% { background-position: 100% 55%; }
+  100% { background-position: 0% 45%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+}
+
+/* Slim official tricolour strip, always pinned to the very top of the viewport. */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  z-index: 1000;
+  background: linear-gradient(90deg, var(--saffron) 0 33.33%, #ffffff 33.33% 66.66%, var(--india-green) 66.66% 100%);
+  pointer-events: none;
+}
+
+/* Guard against sideways scroll on very narrow screens (fold/flip cover displays)
+   without turning the root into a scroll container (keeps the sticky header). */
+#root {
+  overflow-x: clip;
+  padding-top: 4px; /* clears the fixed tricolour strip */
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+/* Full-viewport screen; content column capped at phone width so the
+   percentage-based mobile layout keeps its proportions on desktop. */
+.screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+.screen.scroll {
+  overflow-y: auto;
+}
+
+.container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Frosted card floating over the moving gradient - keeps text crisp while the
+   background drifts behind it. Every auth screen's .container gets this so no
+   per-screen JSX changes were needed for the reskin. */
+.container,
+.glass-card {
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  box-shadow: 0 12px 32px rgba(7, 28, 87, 0.14), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  padding: 28px 20px 24px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 420px) {
+  .container,
+  .glass-card {
+    padding: 32px 36px 28px;
+  }
+}
+
+/* Plain centering wrapper (no glass/blur) for forms that live on the calm
+   dashboard background rather than the moving hero gradient. */
+.form-wrap {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Solid navy CTA used across the app in place of the mobile app's flat near-black
+   button, so primary actions read as "official" rather than generic dark UI.
+   Compound selector (.touchable.btn-navy) so its background reliably beats the
+   base .touchable { background: none } rule regardless of source order below. */
+.touchable.btn-navy {
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+  border-radius: 15px;
+  box-shadow: 0 6px 16px rgba(7, 28, 87, 0.28);
+}
+.touchable.btn-navy:active {
+  opacity: 0.75;
+}
+
+/* TouchableOpacity */
+.touchable {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.touchable:active {
+  opacity: 0.2;
+}
+
+.touchable:focus-visible,
+.drawer-item:focus-visible,
+.alert-ok:focus-visible {
+  outline: 2px solid #9eb7df;
+  outline-offset: 2px;
+}
+
+/* TextInput */
+.rn-input {
+  font-family: inherit;
+  color: #000;
+  outline: none;
+  appearance: none;
+}
+
+.rn-input::placeholder {
+  color: var(--placeholder-color, #9e9e9e);
+  opacity: 1;
+}
+
+.rn-input:focus {
+  border-color: #141313 !important;
+}
+
+.rn-input::-ms-reveal,
+.rn-input::-ms-clear {
+  display: none;
+}
+
+/* ---------- Home: header / content / bottom tab ---------- */
+.home-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-layout {
+  /* Calm, opaque surface for dense dashboard content: a soft static tricolour
+     wash (not the moving hero gradient, which is reserved for the auth screens)
+     so lists, tables and charts stay easy to read. */
+  background-image: radial-gradient(circle at 8% 0%, rgba(255, 153, 51, 0.12), transparent 42%),
+    radial-gradient(circle at 100% 15%, rgba(19, 136, 8, 0.1), transparent 45%);
+  background-color: #f4f5f8;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  min-height: 56px;
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+  box-shadow: 0 2px 10px rgba(7, 28, 87, 0.35);
+}
+
+.role-pill {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 5px 12px;
+  white-space: nowrap;
+  max-width: 40vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 76px; /* tab bar is absolutely positioned over content */
+}
+
+.tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  height: calc(70px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: row;
+  background: linear-gradient(0deg, var(--navy-deep) 0%, var(--navy) 100%);
+  box-shadow: 0 -2px 10px rgba(7, 28, 87, 0.25);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tab-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.tab-label {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ---------- Drawer ---------- */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.drawer-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 11;
+  background: #fff;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform 0.25s ease, visibility 0s linear 0.25s;
+}
+
+.drawer.open {
+  transform: translateX(0);
+  visibility: visible;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease, visibility 0s;
+}
+
+/* Matches CustomDrawer.js: left = screenWidth / 2 - 110 (phone width capped at 420). */
+.drawer-user-img {
+  width: 110px;
+  height: 110px;
+  border-radius: 55px;
+  position: absolute;
+  left: calc(min(100vw, 420px) / 2 - 110px);
+  bottom: -55px;
+  border: 4px solid #fff;
+  object-fit: cover;
+}
+
+.drawer-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: calc(100% - 20px);
+  margin: 4px 10px;
+  padding: 13px 8px;
+  border: none;
+  border-radius: 4px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* ---------- Alert dialog (Alert.alert) ---------- */
+.alert-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.alert-box {
+  width: 100%;
+  max-width: 320px;
+  background: #fff;
+  border-radius: 4px;
+  padding: 24px 24px 8px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.alert-title {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.alert-message {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.7);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.alert-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.alert-ok {
+  background: none;
+  border: none;
+  font: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: var(--navy);
+  padding: 10px 8px;
+  cursor: pointer;
+}
+
+/* ---------- Drawer identity block ---------- */
+.drawer-identity {
+  padding: 62px 20px 4px;
+  text-align: center;
+}
+.drawer-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: #0b0b0b;
+}
+.drawer-subtitle {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+/* ---------- Dashboard page chrome ---------- */
+.page-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px 4px;
+}
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0b0b0b;
+}
+.page-subtitle {
+  padding: 0 20px;
+  color: #52514e;
+  font-size: 13px;
+  margin-top: -4px;
+  margin-bottom: 8px;
+}
+.dash-section {
+  padding: 16px 20px 4px;
+}
+.dash-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b0b0b;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.link-btn {
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Sleek white card used for every panel inside the dashboards (stat groups,
+   charts, forms, list items) - flat opaque surface (not the glassy auth card,
+   since it sits on the dashboard's already-tinted background, not the moving one). */
+.panel {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(11, 21, 43, 0.06), 0 8px 20px rgba(11, 21, 43, 0.06);
+  border: 1px solid rgba(11, 21, 43, 0.06);
+}
+
+/* ---------- Stat tiles ---------- */
+.stat-tile-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 10px;
+  padding: 0 20px;
+}
+.stat-tile {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 1px 2px rgba(11, 21, 43, 0.06), 0 8px 20px rgba(11, 21, 43, 0.06);
+  border: 1px solid rgba(11, 21, 43, 0.06);
+}
+.stat-tile-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.stat-tile-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0b0b0b;
+  line-height: 1.1;
+}
+.stat-tile-label {
+  font-size: 12px;
+  color: #52514e;
+  margin-top: 2px;
+}
+
+/* ---------- Status badge (icon + label + color, never color alone) ---------- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 3px 9px;
+  white-space: nowrap;
+  background: #fff;
+}
+
+/* ---------- Complaint card ---------- */
+.complaint-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(11, 21, 43, 0.06), 0 8px 20px rgba(11, 21, 43, 0.06);
+  border: 1px solid rgba(11, 21, 43, 0.06);
+  margin-bottom: 12px;
+}
+.complaint-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.complaint-id {
+  font-weight: 700;
+  font-size: 14px;
+  color: #0b0b0b;
+  letter-spacing: 0.2px;
+}
+.complaint-sector {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-top: 1px;
+}
+.complaint-notes {
+  font-size: 13px;
+  color: #2c2c2a;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+.complaint-meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+.complaint-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #898781;
+}
+.complaint-subtitle {
+  font-weight: 600;
+  color: #52514e;
+}
+.complaint-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.pill-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+}
+.pill-btn:active {
+  opacity: 0.8;
+}
+.pill-btn.outline {
+  background: #fff;
+  color: var(--navy);
+  border: 1.5px solid var(--navy);
+}
+
+/* ---------- Charts (dataviz skill: recessive grid/axes, direct labels) ---------- */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 34%) 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+.bar-label {
+  font-size: 12px;
+  color: #52514e;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bar-track {
+  height: 14px;
+  border-radius: 4px;
+  background: #eceef1;
+  overflow: hidden;
+  display: block;
+}
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.bar-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0b0b0b;
+  min-width: 18px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.stacked-status-track {
+  height: 16px;
+  border-radius: 6px;
+  background: #eceef1;
+  display: flex;
+  overflow: hidden;
+  gap: 2px;
+}
+.stacked-status-track span {
+  display: block;
+  height: 100%;
+}
+.stacked-status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #52514e;
+  font-weight: 600;
+}
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* ---------- Misc ---------- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 40px 24px;
+  color: #666;
+}
+.empty-state-title {
+  font-weight: 700;
+  color: #0b0b0b;
+  font-size: 15px;
+}
+.empty-state-subtitle {
+  font-size: 13px;
+  color: #898781;
+}
+.spinner-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 24px;
+  color: #666;
+  font-size: 13px;
+}
+.filter-row {
+  display: flex;
+  gap: 8px;
+  padding: 4px 20px 0;
+  overflow-x: auto;
+}
+.filter-chip {
+  flex: none;
+  border: 1.5px solid rgba(11, 21, 43, 0.16);
+  background: #fff;
+  color: #52514e;
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.filter-chip.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
+.fab {
+  position: fixed;
+  right: 18px;
+  bottom: calc(86px + env(safe-area-inset-bottom));
+  z-index: 2;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--india-green) 0%, #0d6606 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(19, 136, 8, 0.4);
+}
+
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 16px;
+  border-top: 1px solid rgba(11, 21, 43, 0.06);
+}
+.notif-row:first-child {
+  border-top: none;
+}
+.notif-message {
+  font-size: 13px;
+  color: #1c1c1c;
+  line-height: 1.4;
+}
+.notif-time {
+  font-size: 11px;
+  color: #898781;
+  margin-top: 4px;
+}
+
+.file-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 80%;
+  height: 45px;
+  padding: 0 14px;
+  border-radius: 15px;
+  border: 1px dashed #9eb7df;
+  background: #fff;
+  color: #52514e;
+  font-size: 13px;
+  cursor: pointer;
+}
