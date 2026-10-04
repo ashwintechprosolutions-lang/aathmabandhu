@@ -11,7 +11,7 @@ const Logo = ({ color = '#0B2E86', width = 220, style, className }) => (
     className={className}
     style={{ display: 'block', ...style }}
     role="img"
-    aria-label="Aatma Bandhu"
+    aria-label="Aathma Bandhu"
   >
     <line x1="40" y1="58" x2="163" y2="58" stroke={color} strokeWidth="1.5" />
     <line x1="237" y1="58" x2="360" y2="58" stroke={color} strokeWidth="1.5" />
@@ -31,7 +31,7 @@ const Logo = ({ color = '#0B2E86', width = 220, style, className }) => (
       letterSpacing="4"
       fill={color}
     >
-      AATMA BANDHU
+      AATHMA BANDHU
     </text>
   </svg>
 );

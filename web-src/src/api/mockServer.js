@@ -30,9 +30,10 @@ function pickOfficerByLevel(agentsInSector, caseLevel, complaintPincode) {
   })[0];
 }
 
-// Bumped to v5: added the Supervisor role (db.supervisors) - forces a fresh
-// reseed for any browser whose cached DB predates that collection.
-const DB_KEY = 'atmabandhu_mock_db_v5';
+// Bumped to v6: renamed the demo email domain to aathmabandhu.in - forces a
+// fresh reseed for any browser whose cached DB has the old @atmabandhu.in demo
+// accounts.
+const DB_KEY = 'aathmabandhu_mock_db_v6';
 const LATENCY_MS = 350;
 const OTP_TTL_MS = 10 * 60 * 1000;
 

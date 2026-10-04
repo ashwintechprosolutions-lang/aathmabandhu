@@ -1,4 +1,4 @@
-# Aatma Bandhu – Web App
+# Aathma Bandhu – Web App
 
 React (Vite) web version of the `GovServiceApp` Expo/React Native app. It has the same
 screens, flow, colours and images. It runs on dummy data by default, so no backend is needed.
@@ -28,9 +28,9 @@ The full presentation dataset is described in **[DEMO_ACCOUNTS.md](DEMO_ACCOUNTS
 
 | Role | Email | Password | Notes |
 |------|-------|----------|-------|
-| Citizen user | `user@atmabandhu.in` | `User@123` | Logs in to Home |
-| Citizen user | `priya@atmabandhu.in` | `Priya@123` | Logs in to Home |
-| Agent | `suresh.agent@atmabandhu.in` | `Agent@123` | Accepted by the API, but the app only lets `user_type_id 2` in (same as mobile) |
+| Citizen user | `user@aathmabandhu.in` | `User@123` | Logs in to Home |
+| Citizen user | `priya@aathmabandhu.in` | `Priya@123` | Logs in to Home |
+| Agent | `suresh.agent@aathmabandhu.in` | `Agent@123` | Accepted by the API, but the app only lets `user_type_id 2` in (same as mobile) |
 
 **Sign Up → Verify:** enter a mock Aadhaar number, e.g. `123456789`, and press **Verify**. This fills in the name and
 mobile number (from the list in `src/api/dummyData.js`).

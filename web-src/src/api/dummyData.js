@@ -2,7 +2,7 @@
 // Shapes match the Sequelize models in GovServiceAppBackend/models. Passwords are
 // plain text because this is demo data only; the real backend hashes them with bcrypt.
 //
-// Everything here is fictional: e-mails use the demo domain atmabandhu.in, and the
+// Everything here is fictional: e-mails use the demo domain aathmabandhu.in, and the
 // 12-digit Aadhaar numbers start with 0/1, which UIDAI never issues, so they cannot
 // belong to a real person.
 //
@@ -66,7 +66,7 @@ const admin = {
   user_id: 1,
   user_type_id: 1,
   notification_id: 'Admin1',
-  email: 'admin@atmabandhu.in',
+  email: 'admin@aathmabandhu.in',
   password: 'Admin@123',
   full_name: 'District Administrator',
   aadhar_number: '100000000001',
@@ -112,7 +112,7 @@ const citizens = CITIZENS.map(([full_name, local, password], i) => {
     user_id,
     user_type_id: 2,
     notification_id: `User${user_id}`,
-    email: `${local}@atmabandhu.in`,
+    email: `${local}@aathmabandhu.in`,
     password,
     full_name,
     aadhar_number: String(100000000000 + 111111 * (i + 1) + 7 * i).padStart(12, '0'),
@@ -223,7 +223,7 @@ export const agents = OFFICERS.map(([full_name, local, agent_sector, officer_lev
   agent_id: i + 1,
   notification_id: `Agent${i + 1}`,
   user_type_id: 3,
-  email: `${local}@atmabandhu.in`,
+  email: `${local}@aathmabandhu.in`,
   full_name,
   mobile: 9440000000 + (i + 1) * 2111,
   password: 'Agent@123',
@@ -257,7 +257,7 @@ export const supervisors = SUPERVISORS.map(([full_name, local, monitors_sector],
   supervisor_id: i + 1,
   notification_id: `Supervisor${i + 1}`,
   user_type_id: 4,
-  email: `${local}@atmabandhu.in`,
+  email: `${local}@aathmabandhu.in`,
   full_name,
   mobile: 9900000000 + (i + 1) * 3187,
   password: 'Supervisor@123',
@@ -351,7 +351,7 @@ for (let i = 0; i < OPEN_COMPLAINTS + CLOSED_COMPLAINTS; i++) {
 
   if (isClosed) {
     const done = daysAgo(Math.max(age - 3 - Math.floor(rand() * 6), 1), 16);
-    notify(user.notification_id, `Complaint ${id} has been resolved by ${agent.full_name} and closed. Thank you for using Aatma Bandhu.`, done);
+    notify(user.notification_id, `Complaint ${id} has been resolved by ${agent.full_name} and closed. Thank you for using Aathma Bandhu.`, done);
     closed.push(id);
     continue;
   }
@@ -384,7 +384,7 @@ notify('Admin1', `Weekly summary: ${complaints.length} open complaints, ${closed
 notify('Admin1', 'Electricity department has the highest number of open complaints this week.', daysAgo(1, 9));
 notify('Admin1', 'Two new officers onboarded for Pensions department.', daysAgo(5, 11));
 citizens.forEach((u, i) => {
-  if (i % 3 === 0) notify(u.notification_id, 'Aatma Bandhu: you can now track your complaint status in real time.', daysAgo(10, 12));
+  if (i % 3 === 0) notify(u.notification_id, 'Aathma Bandhu: you can now track your complaint status in real time.', daysAgo(10, 12));
 });
 
 // ---------------------------------------------------------------------------
