@@ -11,6 +11,9 @@ web-src/node_modules/
 backend/.env
 web-src/.env
 
+# Runtime log from auto-deploy.sh - not source, grows continuously
+deploy.log
+
 # User-uploaded complaint attachments - runtime data, not source
 backend/uploads/
 
