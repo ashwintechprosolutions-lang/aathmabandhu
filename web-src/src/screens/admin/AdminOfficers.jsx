@@ -9,6 +9,7 @@ import Select from '../../components/Select';
 import LoginButton from '../../components/LoginButton';
 import EmptyState from '../../components/EmptyState';
 import Spinner from '../../components/Spinner';
+import Modal from '../../components/Modal';
 import { useAlert } from '../../components/Alert';
 import { COLORS, SECTORS } from '../../constants';
 import useApi from '../../hooks/useApi';
@@ -16,6 +17,51 @@ import api from '../../api/client';
 
 const emptyForm = { full_name: '', email: '', mobile: '', aadhar_number: '', agent_sector: '', officer_level: '', password: '', Cpassword: '' };
 const OFFICER_LEVELS = ['Junior', 'Senior', 'Lead'];
+
+// Compact square tile, same pattern as ComplaintListItem - click for full detail + Remove.
+const OfficerTile = ({ agent: a, busy, onRemove }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" className="touchable tile-card" onClick={() => setOpen(true)}>
+        <div>
+          <div className="complaint-id">{a.full_name}</div>
+          <div className="complaint-sector">{a.agent_sector}</div>
+        </div>
+        <div className="tile-notes">{a.officer_level || 'Junior'} officer</div>
+        <div className="tile-footer">
+          <span className="status-badge" style={{ color: COLORS.navy, borderColor: COLORS.navy }}>
+            {a.users_assigned?.length || 0} assigned
+          </span>
+        </div>
+      </button>
+
+      <Modal open={open} onClose={() => setOpen(false)} title={a.full_name}>
+        <div>
+          <div className="field-label">Department</div>
+          <div className="field-value">{a.agent_sector}</div>
+        </div>
+        <div>
+          <div className="field-label">Officer level</div>
+          <div className="field-value">{a.officer_level || 'Junior'}</div>
+        </div>
+        <div>
+          <div className="field-label">Contact</div>
+          <div className="field-value">{a.email}<br />{a.mobile}</div>
+        </div>
+        <div>
+          <div className="field-label">Open complaints assigned</div>
+          <div className="field-value">{a.users_assigned?.length || 0}</div>
+        </div>
+        <div className="complaint-actions">
+          <button type="button" className="pill-btn outline" disabled={busy} onClick={() => onRemove(a)}>
+            <IoTrashOutline size={13} style={{ verticalAlign: -2 }} /> {busy ? 'Removing…' : 'Remove'}
+          </button>
+        </div>
+      </Modal>
+    </>
+  );
+};
 
 const AdminOfficers = () => {
   const { alert } = useAlert();
@@ -101,28 +147,13 @@ const AdminOfficers = () => {
       <div className="dash-section" style={{ paddingBottom: 24 }}>
         {loading && <Spinner label="Loading officers…" />}
         {!loading && !agents?.length && <EmptyState Icon={IoPeople} title="No officers yet" />}
-        {!loading &&
-          agents?.map((a) => (
-            <div key={a.agent_id} className="complaint-card">
-              <div className="complaint-card-top">
-                <div>
-                  <div className="complaint-id">{a.full_name}</div>
-                  <div className="complaint-sector">{a.agent_sector} · {a.officer_level || 'Junior'}</div>
-                </div>
-                <span className="status-badge" style={{ color: COLORS.navy, borderColor: COLORS.navy }}>
-                  {a.users_assigned?.length || 0} assigned
-                </span>
-              </div>
-              <div className="complaint-meta" style={{ marginTop: 8 }}>
-                <span>{a.email} · {a.mobile}</span>
-              </div>
-              <div className="complaint-actions">
-                <button type="button" className="pill-btn outline" disabled={busyId === a.agent_id} onClick={() => removeOfficer(a)}>
-                  <IoTrashOutline size={13} style={{ verticalAlign: -2 }} /> {busyId === a.agent_id ? 'Removing…' : 'Remove'}
-                </button>
-              </div>
-            </div>
-          ))}
+        {!loading && !!agents?.length && (
+          <div className="tile-grid">
+            {agents.map((a) => (
+              <OfficerTile key={a.agent_id} agent={a} busy={busyId === a.agent_id} onRemove={removeOfficer} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -67,27 +67,30 @@ const AdminComplaints = () => {
       <div className="dash-section" style={{ paddingBottom: 24 }}>
         {loading && <Spinner label="Loading complaints…" />}
         {!loading && !filtered.length && <EmptyState Icon={IoDocumentText} title="No complaints match this filter" />}
-        {!loading &&
-          filtered.map((c) => (
-            <ComplaintListItem
-              key={c.complaint_id}
-              complaint={c}
-              subtitle={agents?.find((a) => a.agent_id === c.agent_id)?.full_name ? `Assigned to ${agents.find((a) => a.agent_id === c.agent_id).full_name}` : undefined}
-              right={
-                <div className="complaint-actions">
-                  <button
-                    type="button"
-                    className="pill-btn"
-                    style={{ background: COLORS.indiaGreen }}
-                    disabled={busyId === c.complaint_id}
-                    onClick={() => markResolved(c)}
-                  >
-                    {busyId === c.complaint_id ? 'Updating…' : 'Mark Resolved'}
-                  </button>
-                </div>
-              }
-            />
-          ))}
+        {!loading && !!filtered.length && (
+          <div className="tile-grid">
+            {filtered.map((c) => (
+              <ComplaintListItem
+                key={c.complaint_id}
+                complaint={c}
+                subtitle={agents?.find((a) => a.agent_id === c.agent_id)?.full_name ? `Assigned to ${agents.find((a) => a.agent_id === c.agent_id).full_name}` : undefined}
+                right={
+                  <div className="complaint-actions">
+                    <button
+                      type="button"
+                      className="pill-btn"
+                      style={{ background: COLORS.indiaGreen }}
+                      disabled={busyId === c.complaint_id}
+                      onClick={() => markResolved(c)}
+                    >
+                      {busyId === c.complaint_id ? 'Updating…' : 'Mark Resolved'}
+                    </button>
+                  </div>
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

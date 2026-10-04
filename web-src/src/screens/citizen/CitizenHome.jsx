@@ -81,7 +81,11 @@ const CitizenHome = () => {
         {!loadingComplaints && !complaints?.length && (
           <EmptyState Icon={IoDocumentText} title="No open complaints" subtitle="Raise a complaint and it will show up here." />
         )}
-        {!loadingComplaints && complaints?.slice(0, 3).map((c) => <ComplaintListItem key={c.complaint_id} complaint={c} />)}
+        {!loadingComplaints && !!complaints?.length && (
+          <div className="tile-grid">
+            {complaints.slice(0, 3).map((c) => <ComplaintListItem key={c.complaint_id} complaint={c} />)}
+          </div>
+        )}
       </div>
 
       <div className="dash-section" style={{ paddingBottom: 20 }}>

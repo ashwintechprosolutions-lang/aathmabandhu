@@ -78,28 +78,31 @@ const OfficerDashboard = () => {
       <div className="dash-section" style={{ paddingBottom: 24 }}>
         {loading && <Spinner label="Loading your queue…" />}
         {!loading && !complaints.length && <EmptyState Icon={IoCheckmarkDone} title="Queue clear" subtitle="No complaints assigned to you right now." />}
-        {!loading &&
-          complaints.map((c) => (
-            <ComplaintListItem
-              key={c.complaint_id}
-              complaint={c}
-              subtitle={citizenName(c.user_id) ? `Raised by ${citizenName(c.user_id)}` : undefined}
-              right={
-                <div className="complaint-actions">
-                  {c.status === 'pending' && (
-                    <button type="button" className="pill-btn" style={{ background: COLORS.navy }} disabled={busyId === c.complaint_id} onClick={() => setStatus(c, 'in-progress')}>
-                      {busyId === c.complaint_id ? 'Updating…' : 'Start Work'}
-                    </button>
-                  )}
-                  {c.status === 'in-progress' && (
-                    <button type="button" className="pill-btn" style={{ background: COLORS.indiaGreen }} disabled={busyId === c.complaint_id} onClick={() => setStatus(c, 'completed')}>
-                      {busyId === c.complaint_id ? 'Updating…' : 'Mark Resolved'}
-                    </button>
-                  )}
-                </div>
-              }
-            />
-          ))}
+        {!loading && !!complaints.length && (
+          <div className="tile-grid">
+            {complaints.map((c) => (
+              <ComplaintListItem
+                key={c.complaint_id}
+                complaint={c}
+                subtitle={citizenName(c.user_id) ? `Raised by ${citizenName(c.user_id)}` : undefined}
+                right={
+                  <div className="complaint-actions">
+                    {c.status === 'pending' && (
+                      <button type="button" className="pill-btn" style={{ background: COLORS.navy }} disabled={busyId === c.complaint_id} onClick={() => setStatus(c, 'in-progress')}>
+                        {busyId === c.complaint_id ? 'Updating…' : 'Start Work'}
+                      </button>
+                    )}
+                    {c.status === 'in-progress' && (
+                      <button type="button" className="pill-btn" style={{ background: COLORS.indiaGreen }} disabled={busyId === c.complaint_id} onClick={() => setStatus(c, 'completed')}>
+                        {busyId === c.complaint_id ? 'Updating…' : 'Mark Resolved'}
+                      </button>
+                    )}
+                  </div>
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

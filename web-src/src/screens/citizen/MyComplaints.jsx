@@ -53,7 +53,11 @@ const MyComplaints = () => {
         {!loading && !filtered.length && (
           <EmptyState Icon={IoDocumentText} title="Nothing here" subtitle="Complaints you raise will appear in this list." />
         )}
-        {!loading && filtered.map((c) => <ComplaintListItem key={c.complaint_id} complaint={c} />)}
+        {!loading && !!filtered.length && (
+          <div className="tile-grid">
+            {filtered.map((c) => <ComplaintListItem key={c.complaint_id} complaint={c} />)}
+          </div>
+        )}
       </div>
 
       <button
