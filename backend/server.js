@@ -1,5 +1,3 @@
-// Deployed automatically via /opt/atmabandhu/auto-deploy.sh (see agent docs).
-// auto-deploy mechanism test - safe to remove
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
