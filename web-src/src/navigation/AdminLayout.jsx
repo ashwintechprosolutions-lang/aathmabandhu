@@ -1,16 +1,18 @@
 import React from 'react';
-import { IoGrid, IoDocumentText, IoNotifications, IoPeople, IoPeopleCircle } from 'react-icons/io5';
+import { IoGrid, IoDocumentText, IoMap, IoNotifications, IoPeople, IoPeopleCircle } from 'react-icons/io5';
 import RoleShell from './RoleShell';
 import { ROUTES } from '../constants';
 
 const tabs = [
   { label: 'Overview', Icon: IoGrid, path: ROUTES.ADMIN },
+  { label: 'Map', Icon: IoMap, path: ROUTES.ADMIN_MAP },
   { label: 'Complaints', Icon: IoDocumentText, path: ROUTES.ADMIN_COMPLAINTS },
   { label: 'Officers', Icon: IoPeople, path: ROUTES.ADMIN_OFFICERS },
 ];
 
 const drawerItems = [
   { label: 'Overview', Icon: IoGrid, path: ROUTES.ADMIN },
+  { label: 'Map', Icon: IoMap, path: ROUTES.ADMIN_MAP },
   { label: 'Complaints', Icon: IoDocumentText, path: ROUTES.ADMIN_COMPLAINTS },
   { label: 'Officers', Icon: IoPeople, path: ROUTES.ADMIN_OFFICERS },
   { label: 'Citizens', Icon: IoPeopleCircle, path: ROUTES.ADMIN_CITIZENS },

@@ -12,7 +12,7 @@ var salt =  bcrypt.genSaltSync(10);
 
 const createAgent = async (req, res) => {
     try {
-      let { email, password, Cpassword, full_name, mobile, user_type_id,agent_sector,aadhar_number, officer_level} = req.body;
+      let { email, password, Cpassword, full_name, mobile, user_type_id,agent_sector,aadhar_number, officer_level, office_pincode} = req.body;
   
       if (password !== Cpassword) {
         return res.status(400).send({ message: "Password not match." });
@@ -47,7 +47,8 @@ const createAgent = async (req, res) => {
         mobile: mobile,
         user_type_id: user_type_id,
         agent_sector: agent_sector,
-        officer_level: ['Junior', 'Senior', 'Lead'].includes(officer_level) ? officer_level : 'Junior'
+        officer_level: ['Junior', 'Senior', 'Lead'].includes(officer_level) ? officer_level : 'Junior',
+        office_pincode: office_pincode ? Number(office_pincode) : null
       });
   
       // Update the user with the generated notification_id

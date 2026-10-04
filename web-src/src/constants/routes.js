@@ -28,6 +28,7 @@ export default {
 
   // Admin (user_type_id 1)
   ADMIN: '/admin',
+  ADMIN_MAP: '/admin/map',
   ADMIN_COMPLAINTS: '/admin/complaints',
   ADMIN_OFFICERS: '/admin/officers',
   ADMIN_CITIZENS: '/admin/citizens',

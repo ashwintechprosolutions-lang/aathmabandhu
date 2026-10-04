@@ -1,0 +1,43 @@
+// Approximate geocoding for the GIS features (officer-proximity routing, admin
+// map, hotspot clustering). Citizens only ever submit a 6-digit pincode, not
+// coordinates, so this resolves a pincode to its AREA CENTROID - good enough for
+// a map/routing demo at neighbourhood granularity, never street-level accuracy.
+// Scoped to GHMC (Greater Hyderabad Municipal Corporation) limits only - this
+// app's coverage area - so every entry is a locality inside the city boundary.
+// Mirrored in AtmaBandhuWeb/src/data/pincodeGeo.js (frontend copy) - keep both in
+// sync, the two apps are separate deployables and don't share a package.
+const PINCODE_GEO = {
+  500016: { lat: 17.4374, lng: 78.4482, area: 'Ameerpet, Hyderabad' },
+  500072: { lat: 17.4849, lng: 78.4138, area: 'Kukatpally, Hyderabad' },
+  500003: { lat: 17.4399, lng: 78.4983, area: 'Secunderabad' },
+  500032: { lat: 17.4401, lng: 78.3489, area: 'Gachibowli, Hyderabad' },
+  500060: { lat: 17.3687, lng: 78.5247, area: 'Dilsukhnagar, Hyderabad' },
+  500074: { lat: 17.3527, lng: 78.5497, area: 'LB Nagar, Hyderabad' },
+  500049: { lat: 17.4959, lng: 78.3539, area: 'Miyapur, Hyderabad' },
+  500028: { lat: 17.3952, lng: 78.4345, area: 'Mehdipatnam, Hyderabad' },
+  500034: { lat: 17.4156, lng: 78.4347, area: 'Banjara Hills, Hyderabad' },
+  500033: { lat: 17.4325, lng: 78.4071, area: 'Jubilee Hills, Hyderabad' },
+  500036: { lat: 17.3745, lng: 78.4983, area: 'Malakpet, Hyderabad' },
+  500002: { lat: 17.3616, lng: 78.4747, area: 'Charminar, Hyderabad' },
+  500039: { lat: 17.4058, lng: 78.5591, area: 'Uppal, Hyderabad' },
+  500047: { lat: 17.4504, lng: 78.5108, area: 'Malkajgiri, Hyderabad' },
+  500048: { lat: 17.3745, lng: 78.4215, area: 'Attapur, Hyderabad' },
+  500020: { lat: 17.4057, lng: 78.4917, area: 'Musheerabad, Hyderabad' },
+};
+const FALLBACK = { lat: 17.385, lng: 78.4867, area: 'Hyderabad' };
+
+function geocode(pincode) {
+  return PINCODE_GEO[Number(pincode)] || FALLBACK;
+}
+
+function haversineKm(a, b) {
+  if (!a || !b) return null;
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const s =
+    Math.sin(dLat / 2) ** 2 + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+module.exports = { PINCODE_GEO, geocode, haversineKm };

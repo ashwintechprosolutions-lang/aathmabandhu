@@ -12,6 +12,11 @@ module.exports = (sequelize, DataTypes) =>{
         // Junior | Senior | Lead - used to route complaints by case level (see
         // services/caseLevelClassifier.js). Existing rows default to Junior.
         officer_level: { type: DataTypes.STRING, allowNull: false, defaultValue: 'Junior' },
+        // Pincode of the officer's base/service area - used to route complaints
+        // to the geographically nearest officer when several share the same
+        // officer_level (see services/agentAssignment.js). Nullable: older rows
+        // predate this field and fall back to level-only ranking.
+        office_pincode: { type: DataTypes.INTEGER, allowNull: true },
         otp: { type: DataTypes.STRING},
         otpExpiration: {type: DataTypes.DATE},
         aadhar_number: { type: DataTypes.STRING, allowNull: false },

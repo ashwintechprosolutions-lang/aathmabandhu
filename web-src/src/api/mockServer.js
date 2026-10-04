@@ -3,24 +3,37 @@
 // UI code is identical whether it talks to this mock or to the live API.
 // Data lives in localStorage so it survives refreshes; call resetMockDb() to reseed.
 import { seed, heuristicLevel } from './dummyData';
+import { geocode, haversineKm } from '../data/pincodeGeo';
 
 // Mirrors GovServiceAppBackend/services/agentAssignment.js. Kept local (rather than
 // imported from dummyData.js) because it must rank the CURRENT db.agents state -
 // including officers created live via /agent/createAgent - not the static seed list.
 const LEVEL_RANK = { Junior: 1, Senior: 2, Lead: 3 };
 const CASE_TO_OFFICER_LEVEL = { Low: 'Junior', Medium: 'Senior', High: 'Lead' };
-function pickOfficerByLevel(agentsInSector, caseLevel) {
+function pickOfficerByLevel(agentsInSector, caseLevel, complaintPincode) {
   const targetRank = LEVEL_RANK[CASE_TO_OFFICER_LEVEL[caseLevel]] || LEVEL_RANK.Junior;
+  const complaintGeo = complaintPincode ? geocode(complaintPincode) : null;
   return [...agentsInSector].sort((a, b) => {
     const rankA = LEVEL_RANK[a.officer_level] || LEVEL_RANK.Junior;
     const rankB = LEVEL_RANK[b.officer_level] || LEVEL_RANK.Junior;
     const distA = Math.abs(rankA - targetRank) + (rankA < targetRank ? 0.5 : 0);
     const distB = Math.abs(rankB - targetRank) + (rankB < targetRank ? 0.5 : 0);
-    return distA !== distB ? distA - distB : a.users_assigned.length - b.users_assigned.length;
+    if (distA !== distB) return distA - distB;
+    if (complaintGeo) {
+      const geoA = a.office_pincode ? haversineKm(complaintGeo, geocode(a.office_pincode)) : null;
+      const geoB = b.office_pincode ? haversineKm(complaintGeo, geocode(b.office_pincode)) : null;
+      if (geoA != null && geoB != null && geoA !== geoB) return geoA - geoB;
+      if (geoA != null && geoB == null) return -1;
+      if (geoB != null && geoA == null) return 1;
+    }
+    return a.users_assigned.length - b.users_assigned.length;
   })[0];
 }
 
-const DB_KEY = 'atmabandhu_mock_db_v3';
+// Bumped to v4: seed data is now scoped to GHMC limits only (see
+// api/dummyData.js's LOCATIONS) - forces a fresh reseed for any browser that
+// already had the old pan-Telangana demo data cached.
+const DB_KEY = 'atmabandhu_mock_db_v4';
 const LATENCY_MS = 350;
 const OTP_TTL_MS = 10 * 60 * 1000;
 
@@ -182,7 +195,7 @@ function registerComplaint(db, body) {
   // Same routing as the live backend: classify urgency, then pick the officer
   // whose rank best matches it (closest rank first, least-loaded as tie-break).
   const case_level = heuristicLevel(body.notes);
-  const agent = pickOfficerByLevel(sectorAgents, case_level);
+  const agent = pickOfficerByLevel(sectorAgents, case_level, body.complaint_pincode);
   const complaint = {
     complaint_id: genComplaintId(),
     pdfComplaint: body.pdfComplaint instanceof File ? `uploads/${body.pdfComplaint.name}` : '',
@@ -207,7 +220,7 @@ const getAllComplaints = (db) => ok({ complaints: db.complaints });
 
 // ---------- /agent ----------
 function createAgent(db, body) {
-  const { email, password, Cpassword, full_name, mobile, user_type_id, agent_sector, aadhar_number, officer_level } = body;
+  const { email, password, Cpassword, full_name, mobile, user_type_id, agent_sector, aadhar_number, officer_level, office_pincode } = body;
   if (password !== Cpassword) return fail(400, { message: 'Password not match.' });
   if (db.agents.find((a) => a.email === lc(email))) return fail(400, { message: 'User already exists.' });
   if (db.agents.find((a) => a.aadhar_number === lc(aadhar_number))) {
@@ -223,6 +236,7 @@ function createAgent(db, body) {
     users_assigned: [],
     agent_sector,
     officer_level: ['Junior', 'Senior', 'Lead'].includes(officer_level) ? officer_level : 'Junior',
+    office_pincode: office_pincode ? Number(office_pincode) : null,
     otp: null,
     otpExpiration: null,
     aadhar_number: String(aadhar_number),

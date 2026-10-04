@@ -20,6 +20,7 @@ export { default as OfficerProfile } from './officer/OfficerProfile';
 
 // Admin (user_type_id 1)
 export { default as AdminDashboard } from './admin/AdminDashboard';
+export { default as AdminMap } from './admin/AdminMap';
 export { default as AdminComplaints } from './admin/AdminComplaints';
 export { default as AdminOfficers } from './admin/AdminOfficers';
 export { default as AdminCitizens } from './admin/AdminCitizens';

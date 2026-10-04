@@ -28,7 +28,9 @@ const dateOf = (iso) => iso.slice(0, 10);
 const timeOf = (iso) => iso.slice(11, 16);
 
 // ---------------------------------------------------------------------------
-// Locations (Telangana)
+// Locations - GHMC (Greater Hyderabad Municipal Corporation) limits only. This
+// app's scope is GHMC, so every seeded address/pincode stays inside the city
+// boundary - no other Telangana districts/towns.
 // ---------------------------------------------------------------------------
 const LOCATIONS = [
   ['Ameerpet, Hyderabad', 500016],
@@ -39,13 +41,14 @@ const LOCATIONS = [
   ['LB Nagar, Hyderabad', 500074],
   ['Miyapur, Hyderabad', 500049],
   ['Mehdipatnam, Hyderabad', 500028],
-  ['Hanamkonda, Warangal', 506001],
-  ['Mukarampura, Karimnagar', 505001],
-  ['Vinayak Nagar, Nizamabad', 503003],
-  ['Wyra Road, Khammam', 507001],
-  ['Mahbubnagar Town', 509001],
-  ['Siddipet Town', 502103],
-  ['Nalgonda Town', 508001],
+  ['Banjara Hills, Hyderabad', 500034],
+  ['Jubilee Hills, Hyderabad', 500033],
+  ['Malakpet, Hyderabad', 500036],
+  ['Charminar, Hyderabad', 500002],
+  ['Uppal, Hyderabad', 500039],
+  ['Malkajgiri, Hyderabad', 500047],
+  ['Attapur, Hyderabad', 500048],
+  ['Musheerabad, Hyderabad', 500020],
 ];
 const STREETS = ['Main Road', 'Temple Street', 'Gandhi Nagar', 'Nehru Colony', 'Srinivasa Colony', 'Ramalayam Street', 'Bank Colony', 'Teachers Colony', 'Market Road', 'Vidya Nagar'];
 const address = (i) => {
@@ -227,6 +230,10 @@ export const agents = OFFICERS.map(([full_name, local, agent_sector, officer_lev
   users_assigned: [],
   agent_sector,
   officer_level,
+  // Base/office area, used for the admin map and nearest-officer routing
+  // (see services/agentAssignment.js-equivalent in mockServer.js). Spread
+  // across the same Telangana locations complaints are raised from.
+  office_pincode: LOCATIONS[i % LOCATIONS.length][1],
   otp: null,
   otpExpiration: null,
   aadhar_number: String(100900000000 + (i + 1) * 104729).padStart(12, '0'),

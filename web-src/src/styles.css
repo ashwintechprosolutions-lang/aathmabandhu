@@ -750,6 +750,16 @@ img {
   text-align: center;
 }
 
+/* ---------- GIS map (ComplaintMap.jsx) ---------- */
+/* Leaflet's internal panes use z-index up to ~700, which would otherwise sit
+   above this app's Modal (z-index 50) and drawer (z-index 100) since those
+   aren't descendants of the map. isolation:isolate contains Leaflet's stacking
+   to just this wrapper so it can never paint over app chrome. */
+.map-wrap {
+  position: relative;
+  isolation: isolate;
+}
+
 /* ---------- Trend (line) chart ---------- */
 .trend-chart {
   width: 100%;

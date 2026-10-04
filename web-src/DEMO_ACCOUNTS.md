@@ -1,7 +1,7 @@
 # Aatma Bandhu: Demo Accounts & Presentation Guide
 
 All data is fictional demo data that runs inside the browser. No real person, email or Aadhaar number is used. The Aadhaar numbers start with 0 or 1, which UIDAI never issues.
-Region used for the demo data: **Telangana** (Hyderabad, Warangal, Karimnagar, Nizamabad, Khammam, Mahbubnagar, Siddipet, Nalgonda).
+Region used for the demo data: **GHMC limits only** (Greater Hyderabad Municipal Corporation) - Ameerpet, Kukatpally, Secunderabad, Gachibowli, Dilsukhnagar, LB Nagar, Miyapur, Mehdipatnam, Banjara Hills, Jubilee Hills, Malakpet, Charminar, Uppal, Malkajgiri, Attapur, Musheerabad.
 
 ## What's in the demo data
 

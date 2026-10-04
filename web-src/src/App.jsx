@@ -16,6 +16,7 @@ import {
   OfficerNotifications,
   OfficerProfile,
   AdminDashboard,
+  AdminMap,
   AdminComplaints,
   AdminOfficers,
   AdminCitizens,
@@ -104,6 +105,7 @@ export default function App() {
         }
       >
         <Route path={ROUTES.ADMIN} element={<AdminDashboard />} />
+        <Route path={ROUTES.ADMIN_MAP} element={<AdminMap />} />
         <Route path={ROUTES.ADMIN_COMPLAINTS} element={<AdminComplaints />} />
         <Route path={ROUTES.ADMIN_OFFICERS} element={<AdminOfficers />} />
         <Route path={ROUTES.ADMIN_CITIZENS} element={<AdminCitizens />} />

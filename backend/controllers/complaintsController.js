@@ -27,7 +27,7 @@ async function registerComplaint(req,res) {
     notes: req.body.notes,
     complaint_address: req.body.complaint_address,
   });
-  const agent = pickOfficer(agents, case_level);
+  const agent = pickOfficer(agents, case_level, req.body.complaint_pincode);
 
   const randomDigits = Math.random().toString().substr(2, 4); // Generate 4 random digits
   const complaint_id = `SRV${randomDigits}AB`; // Construct the ID

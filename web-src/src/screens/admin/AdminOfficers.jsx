@@ -15,7 +15,7 @@ import { COLORS, SECTORS } from '../../constants';
 import useApi from '../../hooks/useApi';
 import api from '../../api/client';
 
-const emptyForm = { full_name: '', email: '', mobile: '', aadhar_number: '', agent_sector: '', officer_level: '', password: '', Cpassword: '' };
+const emptyForm = { full_name: '', email: '', mobile: '', aadhar_number: '', agent_sector: '', officer_level: '', office_pincode: '', password: '', Cpassword: '' };
 const OFFICER_LEVELS = ['Junior', 'Senior', 'Lead'];
 
 // Compact square tile, same pattern as ComplaintListItem - click for full detail + Remove.
@@ -44,6 +44,10 @@ const OfficerTile = ({ agent: a, busy, onRemove }) => {
         <div>
           <div className="field-label">Officer level</div>
           <div className="field-value">{a.officer_level || 'Junior'}</div>
+        </div>
+        <div>
+          <div className="field-label">Office area</div>
+          <div className="field-value">{a.office_pincode || 'Not set'}</div>
         </div>
         <div>
           <div className="field-label">Contact</div>
@@ -135,6 +139,13 @@ const AdminOfficers = () => {
               onChange={set('officer_level')}
               options={OFFICER_LEVELS}
               placeholder="Officer level (handles case urgency)"
+              style={{ width: '100%' }}
+            />
+            <Field
+              value={form.office_pincode}
+              onChangeText={set('office_pincode')}
+              placeholder="Base/office pincode (for map + nearest-officer routing)"
+              keyboardType="numeric"
               style={{ width: '100%' }}
             />
             <Field value={form.password} onChangeText={set('password')} placeholder="Password" secureTextEntry style={{ width: '100%' }} />
