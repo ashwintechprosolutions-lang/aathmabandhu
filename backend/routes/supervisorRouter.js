@@ -10,5 +10,6 @@ router.get('/getAllSupervisors', supervisorController.getAllSupervisors)
 router.get('/getSupervisorDetails/:id', supervisorController.getSupervisorDetails)
 router.delete('/deleteSupervisor/:id', supervisorController.deleteSupervisor)
 router.put('/updateSupervisorProfile', supervisorController.updateSupervisorProfile)
+router.post('/reassignComplaint', supervisorController.reassignComplaint)
 
 module.exports = router

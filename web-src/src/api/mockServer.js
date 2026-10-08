@@ -377,6 +377,29 @@ function updateSupervisorProfile(db, body) {
   return ok({ supervisor: [rows.length] });
 }
 
+// The one write action a Supervisor is allowed: move a complaint to a different
+// officer in the same department. Never touches status.
+function reassignComplaint(db, body) {
+  const { complaint_id, agent_id } = body;
+  const complaint = db.complaints.find((c) => c.complaint_id === complaint_id);
+  if (!complaint) return fail(404, { message: 'Complaint not found.' });
+  const newAgent = db.agents.find((a) => a.agent_id === Number(agent_id));
+  if (!newAgent) return fail(404, { message: 'Officer not found.' });
+  if (newAgent.agent_sector !== complaint.sector) return fail(400, { message: "That officer is not in this complaint's department." });
+  if (complaint.agent_id === newAgent.agent_id) return fail(400, { message: 'This complaint is already assigned to that officer.' });
+
+  const oldAgent = db.agents.find((a) => a.agent_id === complaint.agent_id);
+  if (oldAgent) oldAgent.users_assigned = oldAgent.users_assigned.filter((c) => c.complaint_id !== complaint_id);
+
+  complaint.agent_id = newAgent.agent_id;
+  complaint.updatedAt = now();
+  newAgent.users_assigned = newAgent.users_assigned.filter((c) => c.complaint_id !== complaint_id);
+  newAgent.users_assigned.push({ ...complaint });
+
+  save(db);
+  return ok({ message: 'Complaint reassigned successfully.', agent_id: newAgent.agent_id });
+}
+
 // ---------- /notification ----------
 function sendNotifications(db, body) {
   const { notification_id, message, date, time } = body;
@@ -422,6 +445,7 @@ const routes = [
   ['get', /^\/supervisor\/getSupervisorDetails\/([^/]+)$/, getSupervisor],
   ['delete', /^\/supervisor\/deleteSupervisor\/([^/]+)$/, deleteSupervisor],
   ['put', /^\/supervisor\/updateSupervisorProfile$/, updateSupervisorProfile],
+  ['post', /^\/supervisor\/reassignComplaint$/, reassignComplaint],
 
   ['post', /^\/notification\/sendNotifications$/, sendNotifications],
   ['get', /^\/notification\/getNotifications\/([^/]+)$/, getNotifications],

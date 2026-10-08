@@ -1,6 +1,8 @@
 const db = require('../models')
 
 const Supervisor = db.supervisors
+const Complaint = db.complaints
+const Agent = db.agents
 
 var bcrypt = require('bcryptjs');
 var salt = bcrypt.genSaltSync(10);
@@ -68,10 +70,52 @@ async function updateSupervisorProfile(req, res) {
   res.status(200).json({ supervisor });
 }
 
+// The one write action a Supervisor is allowed: move a complaint to a different
+// officer in the same department. A Supervisor can never resolve a complaint or
+// touch its status - only who it's assigned to.
+async function reassignComplaint(req, res) {
+  const { complaint_id, agent_id } = req.body;
+
+  const complaint = await Complaint.findOne({ where: { complaint_id } });
+  if (!complaint) return res.status(404).json({ message: 'Complaint not found.' });
+
+  const newAgent = await Agent.findOne({ where: { agent_id } });
+  if (!newAgent) return res.status(404).json({ message: 'Officer not found.' });
+  if (newAgent.agent_sector !== complaint.sector) {
+    return res.status(400).json({ message: "That officer is not in this complaint's department." });
+  }
+  if (complaint.agent_id === newAgent.agent_id) {
+    return res.status(400).json({ message: 'This complaint is already assigned to that officer.' });
+  }
+
+  const oldAgentId = complaint.agent_id;
+  await complaint.update({ agent_id: newAgent.agent_id });
+
+  if (oldAgentId) {
+    const oldAgent = await Agent.findOne({ where: { agent_id: oldAgentId } });
+    if (oldAgent) {
+      await Agent.update(
+        { users_assigned: (oldAgent.users_assigned || []).filter((c) => c.complaint_id !== complaint_id) },
+        { where: { agent_id: oldAgentId } },
+      );
+    }
+  }
+
+  const updatedComplaint = await Complaint.findOne({ where: { complaint_id } });
+  const stillAssigned = (newAgent.users_assigned || []).filter((c) => c.complaint_id !== complaint_id);
+  await Agent.update(
+    { users_assigned: [...stillAssigned, updatedComplaint] },
+    { where: { agent_id: newAgent.agent_id } },
+  );
+
+  return res.status(200).json({ message: 'Complaint reassigned successfully.', agent_id: newAgent.agent_id });
+}
+
 module.exports = {
   createSupervisor,
   getSupervisorDetails,
   getAllSupervisors,
   deleteSupervisor,
   updateSupervisorProfile,
+  reassignComplaint,
 }

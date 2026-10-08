@@ -1,7 +1,7 @@
 // GET /supervisor/getAllSupervisors, POST /supervisor/createSupervisor,
-// DELETE /supervisor/deleteSupervisor/:id. Supervisors are a read-only monitor
-// role - they never hold complaints, so deleting one needs no redistribution
-// (unlike deleting an agent).
+// DELETE /supervisor/deleteSupervisor/:id. Supervisors can reassign a complaint
+// to a different officer but never resolve one, and they never hold complaints
+// themselves - so deleting one needs no redistribution (unlike deleting an agent).
 import React, { useState } from 'react';
 import { IoAdd, IoPeopleCircle, IoTrashOutline } from 'react-icons/io5';
 import Field from '../../components/Field';
@@ -27,7 +27,7 @@ const SupervisorTile = ({ supervisor: s, busy, onRemove }) => {
           <div className="complaint-id">{s.full_name}</div>
           <div className="complaint-sector">{s.monitors_sector || ALL_DEPARTMENTS}</div>
         </div>
-        <div className="tile-notes">Monitor-only - cannot resolve complaints</div>
+        <div className="tile-notes">Can reassign complaints, cannot resolve them</div>
         <div className="tile-footer">
           <span className="status-badge" style={{ color: COLORS.navy, borderColor: COLORS.navy }}>Supervisor</span>
         </div>
@@ -111,7 +111,7 @@ const AdminSupervisors = () => {
           <IoAdd size={14} style={{ verticalAlign: -2 }} /> {showForm ? 'Cancel' : 'Add Supervisor'}
         </button>
       </div>
-      <div className="page-subtitle">Read-only monitors - they can view complaints and agents but never resolve or create anything.</div>
+      <div className="page-subtitle">Supervisors can view complaints and agents, and reassign a complaint to a different officer - but never resolve a complaint or create new accounts.</div>
 
       {showForm && (
         <div className="panel" style={{ margin: '4px 20px 16px', padding: 18 }}>

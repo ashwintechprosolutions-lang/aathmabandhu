@@ -22,14 +22,14 @@ Departments: Electricity · Water Supply · Roads · Sanitation · Health · Edu
 Every account signs in at the same **Login** screen; the app automatically opens the right dashboard for that
 account type and blocks it from the others. The workflow: a **Citizen** raises a complaint, it's routed to an
 **Officer** (the backend calls this role "Agent") who resolves it, a **Supervisor** can monitor progress for
-their department (or all departments) but never changes anything, and **Admin** (the government) sees and
-manages everything.
+their department (or all departments) and move a complaint to a different officer if needed, but can never
+resolve one, and **Admin** (the government) sees and manages everything.
 
 | Role | Opens | What it can do |
 |------|-------|-----------------|
 | **Citizen** (`user_type_id 2`) | Home dashboard | Raise a complaint, track "My Complaints" (list or map view), read notifications, edit profile |
 | **Officer / Agent** (`user_type_id 3`) | Assigned-complaints queue | See complaints assigned in their department, mark them "in progress" / "resolved", notifications, profile |
-| **Supervisor** (`user_type_id 4`) | Monitoring overview | Read-only: dashboard stats/charts, complaints, agents - scoped to one department or all. No create/edit/delete actions anywhere |
+| **Supervisor** (`user_type_id 4`) | Monitoring overview | Dashboard stats/charts, complaints, agents - scoped to one department or all. Can reassign a complaint to a different officer; cannot resolve a complaint or create/edit accounts |
 | **Admin** (`user_type_id 1`) | Overview dashboard | Department stats + charts, the GIS complaint map, every complaint, add/remove officers and supervisors, view citizens, notifications |
 
 ## Citizen logins (these open the app)
@@ -81,9 +81,9 @@ Logging in with any of these opens the officer dashboard for that department.
 
 (`@…` = `@aathmabandhu.in`)
 
-## Supervisors (monitor-only), password `Supervisor@123` for all
+## Supervisors, password `Supervisor@123` for all
 
-Read-only: they can see complaints and agents but there are no action buttons anywhere in their dashboard.
+They can see complaints and agents, and reassign a complaint to a different officer in their department. They can never resolve a complaint, and never create or edit accounts.
 
 | Name | Email | Monitors |
 |------|-------|----------|

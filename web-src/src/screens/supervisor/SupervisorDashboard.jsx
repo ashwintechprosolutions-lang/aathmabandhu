@@ -74,7 +74,7 @@ const SupervisorDashboard = () => {
       <div className="page-title-row">
         <span className="page-title">Supervisor Overview</span>
       </div>
-      <div className="page-subtitle">{monitorsSector ? `${monitorsSector} department - monitoring only, no changes made here.` : 'All departments - monitoring only, no changes made here.'}</div>
+      <div className="page-subtitle">{monitorsSector ? `${monitorsSector} department - ` : 'All departments - '}can reassign a complaint to another officer, but never resolve one.</div>
 
       {loading ? (
         <Spinner label="Loading dashboard…" />

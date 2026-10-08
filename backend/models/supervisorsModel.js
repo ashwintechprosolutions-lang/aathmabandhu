@@ -1,7 +1,9 @@
-// Supervisor = the "Officer" role the citizen-to-resolution workflow actually
-// needed: a read-only monitor who oversees a department's agents/complaints
-// (or all departments, when monitors_sector is null), distinct from an Agent
-// (who resolves complaints) and Admin (who sees everything + manages accounts).
+// Supervisor = a monitor who oversees a department's agents/complaints (or all
+// departments, when monitors_sector is null). The one write action allowed is
+// reassigning a complaint to a different officer (see
+// supervisorController.reassignComplaint) - a Supervisor can never resolve a
+// complaint or create/edit accounts, which is what still separates it from an
+// Agent (who resolves complaints) and Admin (who manages everything).
 module.exports = (sequelize, DataTypes) => {
     const Supervisor = sequelize.define("supervisor", {
         supervisor_id: { type: DataTypes.INTEGER, autoIncrement: true, allowNull: false, primaryKey: true },
